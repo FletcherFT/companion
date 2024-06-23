@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import serial
 import socket
@@ -8,7 +8,7 @@ debug = False
 
 endpoints = []
 
-class Endpoint(object):
+class Endpoint:
 
 	def __init__(self, id, type, connectionIds):
 
@@ -22,10 +22,10 @@ class Endpoint(object):
 
 	def connect(self, target):
 		if target.id == self.id:
-			print("loopback not allowed: %s") % self.id
+			print(f"loopback not allowed: {self.id}")
 			return
 		if target.id in self.connectionIds:
-			print("%s is already connected to %s") % (self.id, target.id)
+			print(f"{self.id} is already connected to {target.id}")
 			return
 		self.connections.append(target)
 		self.connectionIds.append(target.id)
@@ -35,7 +35,7 @@ class Endpoint(object):
 		try:
 			self.connectionIds.remove(target_id)
 		except:
-			print("Error disconnecting %s") % target.id
+			print(f"Error disconnecting {target_id}")
 			return
 
 		for endpoint in self.connections:
@@ -62,7 +62,7 @@ class SerialEndpoint(Endpoint):
 		try:
 			if not self.socket.is_open:
 				self.socket.open()
-				print('%s on %s:%s') % (self.id, self.port, self.baudrate)
+				print(f'{self.id} on {self.port}:{self.baudrate}')
 			data = self.socket.read(1024)
 			self.active = True
 		except Exception as e:
@@ -75,7 +75,7 @@ class SerialEndpoint(Endpoint):
 			if debug:
 				#this works fine on rpi, but not desktop (ubuntu 16) for some reason
 				#print('%s read %s') % (self.id, data[:25].decode('utf-8'))
-				print('%s read') % self.id
+				print(f'{self.id} read')
 
 			# write data out on all outbound connections
 			for endpoint in self.connections:
@@ -87,11 +87,11 @@ class SerialEndpoint(Endpoint):
 			if self.socket.is_open:
 				self.socket.write(data)
 				if debug:
-					print('%s write %s') % (self.id, data[:25])
+					print(f'{self.id} write {data[:25]}')
 
 		# serial.SerialException
 		except Exception as e:
-			print("Error writing: %s") % e
+			print(f"Error writing: {e}")
 			return
 
 
@@ -111,7 +111,7 @@ class UDPEndpoint(Endpoint):
 		self.port = port
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.socket.setblocking(False)
-		print('%s on %s:%s') % (self.id, self.ip, self.port)
+		print(f'{self.id} on {self.ip}:{self.port}')
 		if (self.ip == '0.0.0.0'):
 			print('binding')
 			self.socket.bind((ip, int(port)))
@@ -126,7 +126,7 @@ class UDPEndpoint(Endpoint):
 		if len(data) > 0:
 			if debug:
 				#print('%s read %s on %s') % (self.id, data[:25], address)
-				print("%s read") % self.id
+				print(f"{self.id} read")
 
 			for endpoint in self.connections:
 				endpoint.write(data)
@@ -140,10 +140,10 @@ class UDPEndpoint(Endpoint):
 
 			if debug:
 				#print('%s write %s') % (self.id, data[:25])
-				print("%s write") % self.id
+				print(f"{self.id} write")
 
 		except Exception as e:
-			print e
+			print(e)
 			return
 
 
@@ -158,7 +158,7 @@ class UDPEndpoint(Endpoint):
 def add(new_endpoint):
 	for existing_endpoint in endpoints:
 		if new_endpoint.id == existing_endpoint.id:
-			print("Error adding endpoint %s, id already exists") % new_endpoint.id
+			print(f"Error adding endpoint {new_endpoint.id}, id already exists")
 			return
 	for existing_endpoint in endpoints:
 		if new_endpoint.id in existing_endpoint.connectionIds:
@@ -177,14 +177,14 @@ def remove(endpoint_id):
 			break
 
 	if remove is None:
-		print("Error removing endpoint %s, id doesn't exist") % endpoint_id
+		print(f"Error removing endpoint {endpoint_id}, id doesn't exist")
 		return
 
-	print("remove: %s") % remove
+	print(f"remove: {remove}")
 	try:
 		remove.socket.close()
 		endpoints.remove(remove)
-		print("removed endpoint %s") % remove.id
+		print(f"removed endpoint {remove.id}")
 
 
 		for endpoint in endpoints:
@@ -232,10 +232,10 @@ def connect(source_id, target_id):
 			target = endpoint
 
 	if source is None:
-		print("Error: source %s is not present") % source_id
+		print(f"Error: source {source_id} is not present")
 
 	if target is None:
-		print("Error: target %s is not present") % target_id
+		print(f"Error: source {target_id} is not present")
 
 	source.connect(target)
 
@@ -248,7 +248,7 @@ def disconnect(source_id, target_id):
 			source = endpoint
 
 	if source is None:
-		print("Error: source %s is not present") % source_id
+		print(f"Error: source {source_id} is not present")
 
 	#it's ok if target does not exist, it may still be a desired endpoint
 
@@ -271,7 +271,7 @@ def load(filename):
 		configuration = json.load(f)
 		f.close()
 	except Exception as e:
-		print("Error loading from file %s: %s") % (filename, e)
+		print(f"Error loading from file {filename}: {e}")
 		return
 
 	for endpoint in configuration['endpoints']:

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import socket
 import time
@@ -11,12 +11,12 @@ home = os.environ['HOME']
 
 # load configuration from file
 try:
-    print 'loading configuration from file...'
+    print('loading configuration from file...')
     endpoint.load(home+'/routing.conf')
-    print 'configuration successfully loaded'
+    print('configuration successfully loaded')
 except Exception as e:
-    print 'error loading configuration'
-    print e
+    print('error loading configuration')
+    print(e)
 
 # we will listen here for requests
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -34,16 +34,16 @@ while True:
     try:
         # see if there is a new request
         data, address = sock.recvfrom(1024)
-        print("\n%s sent %s\n") % (address, data)
+        print(f"\n{address} sent {data}\n")
 
         # all requests come packed in json
         msg = json.loads(data)
 
         try:
             request = msg['request']
-            print("Got request %s") % request
+            print(f"Got request {request}")
         except:
-            print "No request!"
+            print("No request!")
             continue
 
         if request == 'add endpoint':
@@ -54,7 +54,7 @@ while True:
             sock.sendto(endpoint.to_json(), address)
 
         elif request == 'connect endpoints':
-            print('got connect request: %s') % data
+            print(f'got connect request: {data}')
             endpoint.connect(msg['source'], msg['target'])
 
         elif request == 'disconnect endpoints':
@@ -81,5 +81,5 @@ while True:
     except socket.error as e:
         continue
     except Exception as e:
-        print("Error: %s") % e
+        print(f"Error: {e}")
         continue

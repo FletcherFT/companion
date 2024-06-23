@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/python3 -u
 
 """ Request distance measurements from a Blue Robotics Ping1D device over udp (PingProxy)
     Send results to autopilot via mavproxy over udp for use as mavlink rangefinder
@@ -107,17 +107,17 @@ def main():
 
     ## Send distance_sensor message to autopilot
     def send_distance_data(distance, deviceid, confidence):
-        print("sending distance %d confidence %d" % (distance, confidence))
+        print(f"sending distance {distance} confidence {confidence}")
         if confidence < ARGS.min_confidence:
             distance = 0
 
         autopilot_io.mav.distance_sensor_send(
-            int((time.time() - tboot) * 1000), # time_boot_ms
-            min_distance, # min_distance
-            max_distance, # max_distance
-            int(distance/10), # distance
-            sensor_type, # type
-            deviceid, # device id
+            int((time.time() - tboot) * 1000),  # time_boot_ms
+            min_distance,  # min_distance
+            max_distance,  # max_distance
+            int(distance/10),  # distance
+            sensor_type,  # type
+            deviceid,  # device id
             orientation,
             covarience)
 
